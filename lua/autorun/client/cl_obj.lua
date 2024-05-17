@@ -34,6 +34,8 @@ local lightUI = CreateClientConVar("batdr_objective_lightui", "0", true, false)
 
 local drawInteraction = CreateClientConVar("batdr_interaction_draw", "1", true, false)
 
+local upperCase = CreateClientConVar("batdr_objective_uppercase", "1", true, false)
+
 local function ScaleFontSize(baseFontSize)
 
     local screenWidth = ScrW()
@@ -111,12 +113,12 @@ hook.Add( "OnPlayerChat", "HelloCommand", function( ply, strText, bTeam, bDead )
         
         local arguments = string.sub(strText, 12)
         
-        LocalPlayer():ConCommand("objective_add "..arguments)
+        LocalPlayer():ConCommand("batdr_objective_add "..arguments)
 
     end
 end ) -- Chat command for the addon
 
-concommand.Add( "objective_add", function( ply, cmd, args, argStr )
+concommand.Add( "batdr_objective_add", function( ply, cmd, args, argStr )
 
     if Cooldown then LocalPlayer():ChatPrint("You must wait before using this again.") return end
 
@@ -126,6 +128,10 @@ concommand.Add( "objective_add", function( ply, cmd, args, argStr )
 
     local msg = table.concat(args," ")
 
+    if upperCase:GetBool() then
+        msg = string.upper(msg)    
+    end
+    
     Cooldown = true
 
     surface.PlaySound(SoundObj)
