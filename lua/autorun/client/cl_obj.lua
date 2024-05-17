@@ -4,6 +4,8 @@ local h = ScrH()
 
 local a = 255
 
+local aIn = 0
+
 local initA = 255
 
 local SoundObj = "batdr_sfx_keybreak.wav"
@@ -287,18 +289,46 @@ hook.Add("HUDPaint", "DrawInteraction", function()
 
     
     
-    if shouldDrawInteract then
+    if shouldDrawInteract then  
+        hook.Remove("Think", "FixAlphaInteractionMinus")  
+        hook.Add("Think", "FixAlphaInteractionPlus", function() 
+            aIn = aIn + 10 * 2
+        end)
 
+        if aIn > 255 then
+            aIn = 255 -- lua being weird
+        end
+    else
+        hook.Remove("Think", "FixAlphaInteractionPlus")
+        hook.Add("Think", "FixAlphaInteractionMinus", function() 
+            aIn = aIn - 10 * 2
+        end)
+
+        if aIn < 0 then 
+            aIn = 0 -- lua being weird
+        end
+    end
+
+    
+    
+    if lightUI:GetBool() == true then
+        surface.SetMaterial(Material("ui_title_menu_difficulty_box_02.png")) -- Set the material for the rectangle to the png
+
+        surface.SetDrawColor( 255, 255, 255, aIn ) -- Set color to white (color already present in the png)
+                
+        surface.DrawTexturedRect( w / 2.65, h / 1.172, w / 3.8,  h / 12 ) -- Draw Object PNG
+
+        draw.DrawText("Press E to "..act, "Objective-Font30", w / 1.975, h / 1.14 , Color(255,255,255, aIn), 1)
+    else
         surface.SetMaterial(i1) -- Set the material for the rectangle to the png
 
-        surface.SetDrawColor( 255, 255, 255, 255 ) -- Set color to white (color already present in the png)
+        surface.SetDrawColor( 255, 255, 255, aIn ) -- Set color to white (color already present in the png)
             
         surface.DrawTexturedRect( w / 2.16, h / 1.255, w / 10.8,  h / 7 ) -- Draw Object PNG
 
-        draw.DrawText("E", "Objective-Font35", w / 1.975, h / 1.21, Color(197, 155, 54), 1)
+        draw.DrawText("E", "Objective-Font35", w / 1.975, h / 1.21, Color(197, 155, 54, aIn), 1)
 
-        draw.DrawText(act, "Objective-Font30", w / 1.975, h / 1.14 , Color(197, 155, 54), 1)
-
+        draw.DrawText(act, "Objective-Font30", w / 1.975, h / 1.14 , Color(197, 155, 54, aIn), 1)
     end
 
 end)
