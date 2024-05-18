@@ -1,43 +1,30 @@
 local w = ScrW()
-
 local h = ScrH()
-
 local a = 255
-
 local aIn = 0
-
 local initA = 255
-
 local SoundObj = "batdr_sfx_keybreak.wav"
-
 local SoundObj2 = "sfx_objective_complete.wav"
-
 local mat = Material("objective.png")
-
 local i1 = Material("interact_1.png")
-
 local i2 = Material("interact_2.png")
-
 local i3 = Material("interact_3.png")
-
 local startTime = CurTime()
-
 local timeToEnd = 5.51
-
 local Cooldown = false
-
 local soundWarning = "insane_sounds.wav"
-
+local act = "Interact"
 local OverlayMat = Material("Overlay_InkVignette_02.png")
+local x, y = ScrW() * .38, ScrH() * 0.05
 
+-- Some ConVars
 local lightUI = CreateClientConVar("batdr_objective_lightui", "0", true, false)
-
+local perfSound = CreateClientConVar("batdr_lowhp_sound", "0", true, false)
 local drawInteraction = CreateClientConVar("batdr_interaction_draw", "1", true, false)
-
 local upperCase = CreateClientConVar("batdr_objective_uppercase", "1", true, false)
 
-local function ScaleFontSize(baseFontSize)
 
+local function ScaleFontSize(baseFontSize)
     local screenWidth = ScrW()
     local screenHeight = ScrH()
     
@@ -104,8 +91,6 @@ surface.CreateFont("Objective-Font30", {
 
 })
 
-local x, y = ScrW() * .38, ScrH() * 0.05
-
 hook.Add( "OnPlayerChat", "HelloCommand", function( ply, strText, bTeam, bDead ) 
     if ( ply != LocalPlayer() ) then return end
 
@@ -118,13 +103,15 @@ hook.Add( "OnPlayerChat", "HelloCommand", function( ply, strText, bTeam, bDead )
     end
 end ) -- Chat command for the addon
 
-concommand.Add( "batdr_objective_add", function( ply, cmd, args, argStr )
+concommand.Add( "batdr_objective_add", function( sender, cmd, args, argStr )
 
-    if Cooldown then LocalPlayer():ChatPrint("You must wait before using this again.") return end
+    if not (CanSendObjective) then return end
+
+    if Cooldown then sender:ChatPrint("You must wait before using this again.") return end
 
     newObj = true
 
-    if #args == 0 then LocalPlayer():ChatPrint("Invalid objective!") return end
+    if #args == 0 then sender:ChatPrint("Invalid objective!") return end
 
     local msg = table.concat(args," ")
 
@@ -221,7 +208,11 @@ hook.Add("HUDPaint", "InkVignette", function()
 
     if LocalPlayer():Health() <= 25 then
 
-        surface.PlaySound(soundWarning)
+        if perfSound then
+
+            surface.PlaySound(soundWarning)
+            
+        end
 
         surface.SetMaterial(OverlayMat) -- Set the material for the rectangle to the png
 
@@ -288,8 +279,6 @@ hook.Add("HUDPaint", "DrawInteraction", function()
         if e:IsPlayer() then return end
 
         if (drawInteraction:GetBool() == false) then shouldDrawInteract = false end
-    
-        act = "Interact"
     
     end)
 
